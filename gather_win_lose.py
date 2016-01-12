@@ -48,7 +48,7 @@ for year in years:
                 game_opponent = games_info[7][:-1]
                 game_score = games_info[8]
                 winner = game_opponent
-            g = game(t,game_team,winner,game_score,game_month,game_day)
+            g = game(t,game_opponent,winner,game_score,game_month,game_day)
             t_obj.add_game(g)
         teams_dic[t] = t_obj
     seasons[year] = teams_dic
