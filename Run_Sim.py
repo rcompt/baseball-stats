@@ -14,6 +14,35 @@ years = [str(x) for x in range(2005,2016)]
 year_range = years[0] + "_to_" + years[-1]
 #season = "2014"
 
+def compare_dates(date1, date2):
+    months = {
+        "Jan":1,
+        "Feb":2,
+        "Mar":3,
+        "Apr":4,
+        "May":5,
+        "Jun":6,
+        "Jul":7,
+        "Aug":8,
+        "Sep":9,
+        "Oct":10,
+        "Nov":11,
+        "Dec":12
+    }
+    month1 = months.get(date1.split(",")[0])
+    month2 = months.get(date2.split(",")[0])
+    if month1 < month2:
+        return -1
+    elif month1 > month2:
+        return 1
+    else:
+        day1 = int(date1.split(",")[1])
+        day2 = int(date2.split(",")[1])
+        if day1 < day2:
+            return 1
+        else:
+            return -1
+
 def check_teams(game):
     if game.team_1 == "TBR":
         game.team_1 = "TBD"
@@ -42,6 +71,12 @@ file_p.close()
 ari_score = []
 ari_wins = []
 ari_loses = []
+correct = 0
+first_half_correct = 0
+half_season_correct = 0
+total = 0
+first_half_total = 0
+total_half_season = 0
 for season in seasons:
     dates = {}
     teams = {}
@@ -69,6 +104,20 @@ for season in seasons:
                 wins += 1
             elif game.get_opponent(game.winner) == "ARI":
                 loses += 1
+            winner_odds, loser_odds = ELO.calc_odds(teams[game.winner].get_score(),teams[game.get_opponent(game.winner)].get_score())
+            if winner_odds > loser_odds:
+                correct += 1
+                if compare_dates(date,"Jul,10") > 0:
+                    half_season_correct += 1
+                else:
+                    first_half_correct += 1
+            total += 1
+            if compare_dates(date,"Jul,10") > 0:
+                total_half_season += 1
+            else:
+                first_half_total += 1
+
+                
             winner_new_score, loser_new_score = ELO.cal_elo_rank(teams[game.winner].get_score(),teams[game.get_opponent(game.winner)].get_score())
             teams[game.winner].update_score(winner_new_score)
             teams[game.get_opponent(game.winner)].update_score(loser_new_score)
@@ -84,5 +133,10 @@ ari_score, ari_wins = zip(*data)
 plt.plot(ari_score,ari_wins)
 plt.show()
 slope, intercept, r_value, p_value, std_err = stats.linregress(ari_score,ari_wins)
-
+print("ELO accuracy in predictions")
+print(float(correct)/total)
+print("ELO accuracy in 1st half predictions")
+print(float(first_half_correct)/first_half_total)
+print("ELO accuracy in 2nd half predictions")
+print(float(half_season_correct)/total_half_season)
 plt.plot(ari_score,[slope*x + intercept for x in ari_score])
